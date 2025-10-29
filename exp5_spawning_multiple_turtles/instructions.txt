@@ -1,0 +1,41 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Create Workspace (if not already done)----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+----Go to Source Folder----
+cd ~/catkin_ws/src
+catkin_create_pkg beginner_tutorials rospy std_msgs geometry_msgs turtlesim
+cd beginner_tutorials
+
+----Create the Python File----
+gedit spawn_multiple_turtles.py
+# Paste the code below
+chmod +x spawn_multiple_turtles.py
+
+----Build the Package----
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+----Run the Experiment----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun turtlesim turtlesim_node
+
+# Terminal 3:
+rosrun beginner_tutorials spawn_multiple_turtles.py
+
+----View Node Graph----
+rqt_graph
+
+----Expected Output----
+- Multiple turtles (turtle2, turtle3, turtle4) appear at different positions.
+- You can see them in the turtlesim window.
+- rqt_graph shows the /spawn service calls.
