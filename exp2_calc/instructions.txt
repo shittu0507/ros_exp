@@ -1,0 +1,29 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Create Workspace----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+----Create Package----
+cd ~/catkin_ws/src
+catkin_create_pkg calc_pkg std_msgs rospy roscpp
+
+----Write the Calculator Node----
+cd ~/catkin_ws/src/calc_pkg
+gedit calculator.py  # paste the code below
+chmod +x calculator.py
+
+----Build and Source----
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+----Run----
+roscore
+(then in another terminal:)
+source ~/catkin_ws/devel/setup.bash
+rosrun calc_pkg calculator.py
+
