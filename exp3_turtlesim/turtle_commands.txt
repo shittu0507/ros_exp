@@ -1,0 +1,6 @@
+Keyboard Controls for Turtlesim
+
+Up Arrow     - Move Forward
+Down Arrow   - Move Backward
+Left Arrow   - Turn Left
+Right Arrow  - Turn Right

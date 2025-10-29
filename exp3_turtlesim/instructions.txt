@@ -1,0 +1,118 @@
+# Experiment 3 – Getting Started with Turtlesim
+
+## Objective
+To understand the concept of ROS nodes, topics, and message communication using the turtlesim package.
+
+---
+
+## Step 1: Start the ROS Master
+$ roscore
+
+**Output:**  
+A series of messages indicating that the ROS Master is running.  
+Example:
+... logging to /home/user/.ros/log/...
+started roslaunch server http://localhost:XXXXX/
+roscore started successfully
+
+---
+
+## Step 2: Launch the Turtlesim Node
+Open a **new terminal** and run:
+$ rosrun turtlesim turtlesim_node
+
+**Output:**  
+A blue window with a small turtle appears — this is your **turtlesim** simulation.  
+The terminal will show:
+[INFO] [XXXX]: Starting turtlesim with node name /turtlesim
+
+---
+
+## Step 3: Control the Turtle with Keyboard
+Open **another new terminal** and run:
+$ rosrun turtlesim turtle_teleop_key
+
+**Output:**  
+A prompt appears like:
+Reading from keyboard
+Use arrow keys to move the turtle
+
+Use:
+- ⬆️ Up Arrow → Move forward  
+- ⬇️ Down Arrow → Move backward  
+- ⬅️ Left Arrow → Turn left  
+- ➡️ Right Arrow → Turn right  
+
+The turtle will move accordingly in the turtlesim window.
+
+---
+
+## Step 4: List Active Nodes
+$ rosnode list
+
+**Expected Output:**
+/rosout  
+/turtlesim  
+/teleop_turtle
+
+---
+
+## Step 5: List Active Topics
+$ rostopic list
+
+**Expected Output:**
+/rosout  
+/rosout_agg  
+/turtle1/cmd_vel  
+/turtle1/color_sensor  
+/turtle1/pose
+
+---
+
+## Step 6: Check Topic Information
+$ rostopic info /turtle1/cmd_vel
+
+**Output Example:**
+Type: geometry_msgs/Twist  
+Publishers:  
+ * /teleop_turtle (http://localhost:XXXXX/)  
+Subscribers:  
+ * /turtlesim (http://localhost:YYYYY/)
+
+This shows how `/teleop_turtle` publishes movement commands to `/turtlesim`.
+
+---
+
+## Step 7: Display Node Connections using rqt_graph
+$ rqt_graph
+
+**Output:**  
+A GUI window appears showing:
+- Two nodes: `/teleop_turtle` and `/turtlesim`
+- One topic: `/turtle1/cmd_vel` connecting them
+
+That graph visually shows **how data flows** from keyboard → teleop → turtlesim.
+
+---
+
+## Step 8: Observe Messages on a Topic
+$ rostopic echo /turtle1/pose
+
+**Output:** (updates continuously as the turtle moves)
+x: 5.544  
+y: 5.544  
+theta: 0.0  
+linear_velocity: 1.0  
+angular_velocity: 0.0
+
+---
+
+## Step 9: Stop Everything
+When done:
+- Close the turtlesim window.
+- Stop all terminals by pressing **Ctrl + C**.
+
+---
+
+## Conclusion
+This experiment helps you understand how **ROS nodes communicate via topics**, using **turtlesim** as a basic simulation.
