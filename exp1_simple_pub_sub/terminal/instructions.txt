@@ -1,0 +1,38 @@
+-----Make sure you have ROS Noetic installed and sourced:----
+source /opt/ros/noetic/setup.bash
+
+----workspace----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+---inside ws---
+cd ~/catkin_ws/src
+catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
+
+--inside beginner_tutorials--
+---Write the Publisher (Python)---
+gedit talker.py or code talker.py >>> paste the code
+chmod +x talker.py
+
+---Write the Subscriber (Python)---
+gedit listener.py or code listener.py >>> paste the code
+chmod +x listener.py
+
+---Build the Package---
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+---Run Everything---
+terminal 1:
+roscore
+
+terminal 2:
+source ~/catkin_ws/devel/setup.bash
+rosrun beginner_tutorials talker.py
+
+terminal 3:
+source ~/catkin_ws/devel/setup.bash
+rosrun beginner_tutorials listener.py
