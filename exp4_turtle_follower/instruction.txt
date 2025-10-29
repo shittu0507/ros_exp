@@ -1,0 +1,98 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Create Workspace (if not already done)----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+----Go to Source Folder----
+cd ~/catkin_ws/src
+catkin_create_pkg beginner_tutorials rospy geometry_msgs turtlesim
+cd beginner_tutorials
+
+----Create the Python File----
+gedit turtle_follower.py
+# Paste the code below
+chmod +x turtle_follower.py
+
+----Python Code (turtle_follower.py)----
+#!/usr/bin/env python3
+import rospy
+from turtlesim.msg import Pose
+from geometry_msgs.msg import Twist
+import math
+
+turtle1_pose = Pose()
+turtle2_pose = Pose()
+
+def pose1_callback(data):
+    global turtle1_pose
+    turtle1_pose = data
+
+def pose2_callback(data):
+    global turtle2_pose
+    turtle2_pose = data
+
+def follower():
+    rospy.init_node('turtle_follower', anonymous=True)
+
+    rospy.Subscriber('/turtle1/pose', Pose, pose1_callback)
+    rospy.Subscriber('/turtle2/pose', Pose, pose2_callback)
+
+    pub = rospy.Publisher('/turtle2/cmd_vel', Twist, queue_size=10)
+
+    rate = rospy.Rate(10)
+    vel_msg = Twist()
+
+    while not rospy.is_shutdown():
+        # Calculate distance and angle
+        dx = turtle1_pose.x - turtle2_pose.x
+        dy = turtle1_pose.y - turtle2_pose.y
+        distance = math.sqrt(dx**2 + dy**2)
+        angle_to_goal = math.atan2(dy, dx)
+        angle_diff = angle_to_goal - turtle2_pose.theta
+
+        # Control law
+        vel_msg.linear.x = 1.5 * distance
+        vel_msg.angular.z = 4.0 * angle_diff
+
+        pub.publish(vel_msg)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        follower()
+    except rospy.ROSInterruptException:
+        pass
+
+----Build the Package----
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+----Run the Experiment----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun turtlesim turtlesim_node
+
+# Terminal 3:
+rosservice call /spawn 5 5 0 "turtle2"
+
+# Terminal 4:
+rosrun beginner_tutorials turtle_follower.py
+
+----View Node Graph----
+rqt_graph
+
+----Expected Output----
+- Two turtles appear in the turtlesim window.
+- The second turtle (/turtle2) follows the first turtle (/turtle1).
+- Movement can be seen if you control turtle1 using:
+  rosrun turtlesim turtle_teleop_key
+
+----End of Experiment 4 (Turtle Follower)----
+
