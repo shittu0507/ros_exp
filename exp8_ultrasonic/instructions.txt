@@ -1,0 +1,54 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Ensure rosserial packages are installed----
+sudo apt install ros-noetic-rosserial ros-noetic-rosserial-arduino ros-noetic-rosserial-python
+
+----Create Arduino Library for ROS (if not done already)----
+mkdir -p ~/Arduino/libraries
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+----Hardware Requirements----
+- Arduino UNO board
+- Ultrasonic sensor HC-SR04
+- Jumper wires
+- Breadboard (optional)
+
+----Connections for Ultrasonic Sensor (HC-SR04)----
+- VCC  → 5V on Arduino
+- GND  → GND on Arduino
+- TRIG → Digital Pin 9
+- ECHO → Digital Pin 10
+
+----Upload Arduino Code----
+1. Open Arduino IDE → New File
+2. Paste the code from ultrasonic_distance_ros.ino
+3. Save as ultrasonic_distance_ros.ino
+4. Select Board: **Arduino/Genuino Uno**
+5. Upload to Arduino.
+
+----Run ROS side----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun rosserial_python serial_node.py /dev/ttyUSB0
+# (use 'ls /dev/tty*' to check port name, e.g., /dev/ttyACM0)
+
+# Terminal 3:
+rostopic echo /ultrasonic_distance
+
+----Expected Output----
+- You will see live distance readings in centimeters.
+- Example output:
+  data: 15.30
+  data: 16.10
+  data: 17.05
+- When an object moves closer/farther from the sensor, the value changes accordingly.
+
+----Optional: Adjust Measurement Frequency----
+In Arduino code, you can change **delay(1000)** for different update rates:
+- delay(500) → faster readings
+- delay(2000) → slower readings
+
