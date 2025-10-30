@@ -1,0 +1,68 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Ensure rosserial packages are installed----
+sudo apt install ros-noetic-rosserial ros-noetic-rosserial-arduino ros-noetic-rosserial-python
+
+----Create Arduino Library for ROS (if not done already)----
+mkdir -p ~/Arduino/libraries
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+----Hardware Requirements----
+- Arduino UNO board
+- SG90 or any 9g Servo Motor
+- Jumper wires
+- Breadboard (optional)
+
+----Connections for Servo Motor----
+- Servo RED wire → 5V on Arduino
+- Servo BROWN/BLACK wire → GND on Arduino
+- Servo ORANGE/YELLOW wire (Signal) → Digital Pin 9 on Arduino
+
+----Upload Arduino Code----
+1. Open Arduino IDE → New File
+2. Paste the code from servo_control_ros.ino
+3. Save as servo_control_ros.ino
+4. Select Board: **Arduino/Genuino Uno**
+5. Upload to Arduino.
+
+----Run ROS side----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun rosserial_python serial_node.py /dev/ttyUSB0
+# (use 'ls /dev/tty*' to check port name, e.g., /dev/ttyACM0)
+
+# Terminal 3:
+rostopic pub /servo std_msgs/Int16 "data: 90"
+# Servo turns to 90°
+
+rostopic pub /servo std_msgs/Int16 "data: 0"
+# Servo turns to 0°
+
+rostopic pub /servo std_msgs/Int16 "data: 180"
+# Servo turns to 180°
+
+----Expected Output----
+- Servo rotates according to the angle value (0–180) received from the ROS topic `/servo`.
+- You can observe smooth movement of the servo arm.
+
+----Optional: Adjust Speed or Limits----
+- To slow down movement, add small delays in the loop.
+- To limit range, restrict the angle in the Arduino code.
+
+----If examiner asks for different angles or delays----
+- To rotate servo to **any specific angle**, change the value in the publish command:
+  Example:  
+  `rostopic pub /servo std_msgs/Int16 "data: 45"` → rotates 45°  
+  `rostopic pub /servo std_msgs/Int16 "data: 15"` → rotates 15°  
+  `rostopic pub /servo std_msgs/Int16 "data: 120"` → rotates 120°
+
+- If examiner asks for **rotation with delay**, open the Arduino code and change the delay value:
+  Example:
+  ```cpp
+  delay(1000); // 1 second delay between rotations
+  delay(2000); // 2 second delay
+
