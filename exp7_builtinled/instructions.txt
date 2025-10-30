@@ -1,0 +1,38 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Ensure rosserial packages are installed----
+sudo apt install ros-noetic-rosserial ros-noetic-rosserial-arduino ros-noetic-rosserial-python
+
+----Create Arduino Library for ROS (if not done earlier)----
+mkdir -p ~/Arduino/libraries
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+----Open Arduino IDE----
+1. Go to File → New
+2. Paste the code from led_control_ros.ino
+3. Save as led_control_ros.ino
+4. Select board: Arduino/Genuino Uno
+5. Upload the code to the board
+
+----Run ROS side----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun rosserial_python serial_node.py /dev/ttyUSB0
+# (replace /dev/ttyUSB0 with your actual Arduino port using: ls /dev/tty*)
+
+# Terminal 3:
+rostopic pub /led_control std_msgs/String "data: 'ON'"
+# Turns LED ON
+
+# Terminal 4:
+rostopic pub /led_control std_msgs/String "data: 'OFF'"
+# Turns LED OFF
+
+----Expected Output----
+- When you publish "ON", the Arduino built-in LED (pin 13) lights up.
+- When you publish "OFF", the LED turns off.
+
