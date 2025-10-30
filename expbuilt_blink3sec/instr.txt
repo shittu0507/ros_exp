@@ -1,0 +1,18 @@
+Upload code to Arduino
+
+Run in Ubuntu:
+
+rosrun rosserial_python serial_node.py /dev/ttyACM0
+
+
+Open another terminal:
+
+rostopic echo /led_status
+
+
+📟 You’ll see:
+
+data: true
+data: false
+data: true
+data: false
