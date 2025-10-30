@@ -1,0 +1,58 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Ensure rosserial packages are installed----
+sudo apt install ros-noetic-rosserial ros-noetic-rosserial-arduino ros-noetic-rosserial-python
+
+----Create Arduino Library for ROS (if not done earlier)----
+mkdir -p ~/Arduino/libraries
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+----Hardware Connections (External LED)----
+- Arduino UNO board
+- 1 x LED (any color)
+- 1 x 220Ω resistor
+- Jumper wires and breadboard
+
+----Connection Details----
+- LED longer leg (anode +) → Arduino **Digital Pin 8**
+- LED shorter leg (cathode -) → one end of **220Ω resistor**
+- Other end of resistor → **Arduino GND**
+- This completes the LED circuit between Pin 8 and Ground.
+
+----Upload Arduino Code----
+1. Open Arduino IDE → New File
+2. Paste the code from external_led_ros.ino
+3. Save as external_led_ros.ino
+4. Select Board: **Arduino/Genuino Uno**
+5. Upload to Arduino.
+
+----Run ROS side----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun rosserial_python serial_node.py /dev/ttyUSB0
+# (use 'ls /dev/tty*' to find your port, e.g., /dev/ttyACM0)
+
+# Terminal 3:
+rostopic pub /ext_led std_msgs/String "data: 'ON'"
+# LED turns ON
+
+# Terminal 4:
+rostopic pub /ext_led std_msgs/String "data: 'OFF'"
+# LED turns OFF
+
+----If your lab requires the LED to blink----
+- Open your Arduino code (external_led_ros.ino)
+- Locate the line with **delay(1000)** or **delay(2000)**
+  - delay(1000) → 1 second blink
+  - delay(2000) → 2 second blink
+- Change the delay value as per your lab requirement.
+
+----Expected Output----
+- When you publish "ON", the LED glows.
+- When you publish "OFF", the LED turns off.
+- If delay is added, LED will blink with the set interval.
+
