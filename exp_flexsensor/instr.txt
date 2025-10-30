@@ -1,0 +1,93 @@
+----Make sure ROS Noetic and Arduino IDE are installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----If Arduino library not added yet (run once)----
+cd ~/Arduino/libraries
+git clone https://github.com/ros-drivers/rosserial.git
+cd ~/Arduino/libraries/rosserial/rosserial_arduino
+make_libraries.py ~/Arduino/libraries
+# If folder not found or shows 'No such file or directory', create it manually:
+# mkdir -p ~/Arduino/libraries and rerun the commands.
+
+----Open Arduino IDE and select Board and Port----
+Tools → Board → Arduino Uno  
+Tools → Port → /dev/ttyACM0 (or similar)
+
+----Connections for Flex Sensor----
+1. Connect one end of Flex sensor to +5V.
+2. Connect the other end of Flex sensor to analog input pin A0.
+3. Place a resistor (10 kΩ recommended) between A0 and GND — forming a voltage divider.
+   - Flex sensor and resistor should form a series connection between 5V and GND.
+   - Middle junction (A0) goes to Arduino analog input.
+4. If 10kΩ resistor is not available:
+   - You can use 4.7kΩ, 20kΩ, etc.
+   - Smaller resistance → larger voltage change, but less stable reading.
+   - If resistor value changes, no code modification is needed, only sensor sensitivity changes slightly.
+Brown–Black–Orange–Gold 10  Yellow – Violet – Red – Gold4.7 Red – Black – Orange – Gold20
+----Arduino Code (flex_sensor_ros.ino)----
+#include <ros.h>
+#include <std_msgs/Float32.h>
+
+ros::NodeHandle nh;
+std_msgs::Float32 flex_msg;
+ros::Publisher flex_pub("flex_value", &flex_msg);
+
+int flexPin = A0;
+
+void setup() {
+  nh.initNode();
+  nh.advertise(flex_pub);
+}
+
+void loop() {
+  int sensorValue = analogRead(flexPin);
+  float voltage = sensorValue * (5.0 / 1023.0);
+  flex_msg.data = voltage;
+  flex_pub.publish(&flex_msg);
+  nh.spinOnce();
+  delay(500);  // Publish every 0.5 seconds
+}
+
+----Upload the code to Arduino----
+Verify → Upload
+
+----Start ROS Serial Communication----
+In Ubuntu terminal:
+roscore
+
+Open new terminal:
+rosrun rosserial_python serial_node.py /dev/ttyACM0
+
+----View Sensor Data in ROS----
+rosrun rqt_plot rqt_plot
+# In the GUI, type: /flex_value/data
+# OR simply:
+rostopic echo /flex_value
+
+----Expected Output----
+- You’ll see voltage values like:
+  data: 2.45
+  data: 3.10
+  data: 1.98
+- When you bend the flex sensor, the voltage changes.
+- Higher bend = higher or lower voltage depending on orientation.
+
+----If Error Occurs----
+1. Error: "Unable to sync with device"
+   → Check correct port (/dev/ttyACM0 or /dev/ttyUSB0).
+   → Reconnect USB and re-upload sketch.
+2. Error: "rosserial_python not found"
+   → Install it using:
+     sudo apt install ros-noetic-rosserial-python
+3. If Arduino/libraries folder not found
+   → mkdir -p ~/Arduino/libraries before running make_libraries.py
+4. If no data seen in rostopic echo
+   → Make sure rosserial node is running and Arduino is connected properly.
+   → Check baud rate (default is 57600).
+   → Retry by unplugging and reconnecting Arduino.
+
+----Expected Observation----
+- Bending the flex sensor will change analog values continuously.
+- Plot or echo will show changing voltage data in ROS terminal.
+
+
