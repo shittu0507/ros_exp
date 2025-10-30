@@ -1,0 +1,4 @@
+rostopic pub -r 1 /servo_angle std_msgs/UInt16 "data: 20"
+rostopic pub -r 1 /servo_angle std_msgs/UInt16 "data: 120"
+rostopic pub -r 1 /servo_angle std_msgs/UInt16 "data: 45"
+
