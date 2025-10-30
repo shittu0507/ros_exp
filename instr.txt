@@ -1,0 +1,100 @@
+----Make sure ROS Noetic and rosserial packages are installed----
+sudo apt install ros-noetic-rosserial ros-noetic-rosserial-arduino
+source /opt/ros/noetic/setup.bash
+
+----Generate ros_lib for Arduino----
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+----Connections----
+5V  ---- Flex Sensor ---- A0 ---- 10kΩ resistor ---- GND
+
+- One end of Flex Sensor → 5V
+- Other end → Analog pin A0
+- 10kΩ resistor connects A0 → GND
+- The A0 pin reads varying voltage as the flex sensor bends.
+
+If 10kΩ resistor not available:
+| Resistor Used | Effect |
+|----------------|--------|
+| 4.7kΩ | Slightly smaller output range |
+| 22kΩ | More sensitivity, may add noise |
+| 1kΩ–2.2kΩ | Lower sensitivity |
+
+When resistor value changes, you may adjust calibration or map() limits in Arduino code.
+
+10kΩ resistor color bands → Brown, Black, Orange, Gold  
+(Connect between A0 and GND on breadboard)
+
+----Create Arduino File----
+gedit flex_sensor_ros.ino
+
+----Paste This Code----
+
+#include <ros.h>
+#include <std_msgs/Int16.h>
+
+ros::NodeHandle nh;
+std_msgs::Int16 flex_msg;
+ros::Publisher flex_pub("flex_value", &flex_msg);
+int flexPin = A0;
+
+void setup() {
+  nh.initNode();
+  nh.advertise(flex_pub);
+}
+
+void loop() {
+  int sensorValue = analogRead(flexPin);
+  flex_msg.data = sensorValue;
+  flex_pub.publish(&flex_msg);
+  nh.spinOnce();
+  delay(100);
+}
+
+----Upload to Arduino----
+Open Arduino IDE → Select:
+Tools → Board: "Arduino Uno"
+Tools → Port: (choose your USB port)
+Click Upload.
+
+----Run in Terminals----
+# Terminal 1:
+source /opt/ros/noetic/setup.bash
+roscore
+
+# Terminal 2:
+source /opt/ros/noetic/setup.bash
+rosrun rosserial_python serial_node.py /dev/ttyACM0
+(*If not working, try /dev/ttyUSB0*)
+
+# Terminal 3:
+source /opt/ros/noetic/setup.bash
+rostopic echo /flex_value
+
+----Expected Output----
+data: 320
+data: 460
+data: 700
+
+- Value increases when the flex sensor is bent.
+- Value decreases when it straightens.
+- If mapped in code: 0° = straight, 90° = half bent, 150° = fully bent.
+
+----Code Notes----
+- delay(100) keeps data stable.
+- For higher resistor (like 22kΩ), values increase faster — you can smooth output by averaging.
+- For lower resistor, smaller values but same working.
+
+----Exam Tips----
+- If examiner asks to “change resistor”, use 4.7kΩ or 22kΩ and explain that it changes sensitivity.
+- If asked to “calibrate”, modify `map()` in Arduino code.
+- Show by bending sensor and displaying values in:
+  rostopic echo /flex_value
+
+----GitHub Save Commands----
+cd ~/ros_exp/exp10_flex_sensor
+git add .
+git commit -m "Added flex sensor integration using Arduino and ROS Noetic"
+git push origin main
+
