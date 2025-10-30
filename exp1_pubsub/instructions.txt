@@ -1,0 +1,47 @@
+----Make sure ROS Noetic is installed and sourced----
+source /opt/ros/noetic/setup.bash
+
+----Create Workspace (if not done already)----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+----Create a Package----
+cd ~/catkin_ws/src
+catkin_create_pkg beginner_tutorials rospy std_msgs
+cd beginner_tutorials
+mkdir scripts
+cd scripts
+
+----Create Publisher Node (talker.py)----
+gedit talker.py
+
+# Paste the code below and save
+chmod +x talker.py
+
+----Create Subscriber Node (listener.py)----
+gedit listener.py
+
+# Paste the code below and save
+chmod +x listener.py
+
+----Build and Source Workspace----
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+----Run the Nodes----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun beginner_tutorials talker.py
+
+# Terminal 3:
+rosrun beginner_tutorials listener.py
+
+----Expected Output----
+- talker.py will publish messages like "Hello ROS" to the topic /chatter.
+- listener.py will receive and print the same messages.
+
