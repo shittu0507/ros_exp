@@ -1,0 +1,71 @@
+----Make sure ROS Noetic and Arduino IDE are installed----
+sudo apt update
+sudo apt install ros-noetic-rosserial-arduino ros-noetic-rosserial
+
+----Source ROS----
+source /opt/ros/noetic/setup.bash
+
+----Create Catkin Workspace (if not already done)----
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+----Create ROS Package (if not created)----
+cd ~/catkin_ws/src
+catkin_create_pkg arduino_integration rospy std_msgs
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+
+----Setup Arduino ROS Libraries----
+cd ~/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py .
+
+# This command will generate folders like:
+# ros_lib, std_msgs, geometry_msgs, sensor_msgs etc.
+# inside the Arduino/libraries folder.
+
+----If you get "No such file or directory" error----
+
+# This means Arduino IDE has not yet created its folder structure.
+# Follow these steps:
+
+1. Open Arduino IDE once from Applications.
+2. Close it again.
+3. Then check if the folder exists:
+   cd ~/Arduino
+   ls
+   # You should see: libraries
+4. If it doesn’t exist, create it manually:
+   mkdir -p ~/Arduino/libraries
+5. Now run the command again:
+   cd ~/Arduino/libraries
+   rosrun rosserial_arduino make_libraries.py .
+
+----Upload Code to Arduino----
+1. Open Arduino IDE
+2. File → Open → select arduino_ros_pubsub.ino
+3. Select Board: Arduino/Genuino Uno
+4. Select Port: (example: /dev/ttyACM0)
+5. Click Upload
+
+----Connect Arduino with ROS----
+# Terminal 1:
+roscore
+
+# Terminal 2:
+rosrun rosserial_python serial_node.py /dev/ttyACM0
+
+----Test Communication----
+# To see Arduino messages:
+rostopic echo /chatter
+
+# To control LED from ROS:
+rostopic pub /led std_msgs/Bool "data: true"
+
+----Expected Output----
+- Arduino onboard LED turns ON/OFF based on messages from ROS.
+- Arduino sends “Hello ROS!” repeatedly to the /chatter topic.
+- Communication is established via serial between Arduino and ROS.
+
